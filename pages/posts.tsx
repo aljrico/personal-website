@@ -2,11 +2,13 @@ import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import React, { useState, useEffect } from 'react';
 import parsePosts from './posts/parsePosts';
+import fs from 'fs';
+import path from 'path';
 
 const Posts: NextPage = (props: any) => {
   const renderExcerpts = () => {
     const content = props.data;
-    const fileNames = props.fileName;
+    const fileNames = props.fileNames;
     const post = content.map((c: any, i: number) => {
       const postPath = fileNames[i];
       const postUrl = '/posts/' + postPath;
@@ -36,10 +38,14 @@ const Posts: NextPage = (props: any) => {
 };
 
 Posts.getInitialProps = async () => {
+  const getPostFiles = () => {
+    const files = fs.readdirSync(path.join('content'));
+    return files;
+  };
   const importPosts = async (postNames: any) => {
     const postContents = await Promise.all(
       postNames.map((postName: string) => {
-        const content = import('../content/' + postName + '.md');
+        const content = import('../content/' + postName);
         return content;
       })
     );
@@ -54,12 +60,12 @@ Posts.getInitialProps = async () => {
     return data;
   };
 
-  const postNames = ['first_post', 'awesome-nextjs-blog'];
+  const postNames = getPostFiles();
   const postContents = await importPosts(postNames);
   const data = processPosts(postContents);
 
   // Pass data to our component props
-  return { data: data, fileName: postNames };
+  return { data: data, fileNames: postNames };
 };
 
 export default Posts;
