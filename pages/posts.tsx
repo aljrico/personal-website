@@ -7,16 +7,20 @@ import path from 'path';
 
 const Posts: NextPage = (props: any) => {
   const renderExcerpts = () => {
-    const content = props.data;
+    const postTitles = props.postTitles;
+    const postExcerpts = props.postExcerpts;
     const fileNames = props.fileNames;
-    const post = content.map((c: any, i: number) => {
-      const postPath = fileNames[i];
-      const postUrl = '/posts/' + postPath;
+    const post = fileNames.map((fileName: string, i: number) => {
+      const title = postTitles[i];
+      const excerpt = postExcerpts[i];
+      const postUrl = '/posts/' + fileName;
       return (
-        <a href={postUrl} className={styles.excerptCard}>
-          <h3>{c.data.title}</h3>
-          <p>{c.data.excerpt}</p>
-        </a>
+        <>
+          <a href={postUrl} className={styles.excerptCard}>
+            <h3>{title}</h3>
+            <p>{excerpt}</p>
+          </a>
+        </>
       );
     });
     return post;
@@ -37,15 +41,16 @@ const Posts: NextPage = (props: any) => {
   );
 };
 
-Posts.getInitialProps = async () => {
+export async function getServerSideProps() {
   const getPostFiles = () => {
-    const files = fs.readdirSync(path.join('content'));
-    return files;
+    const fullFileNames = fs.readdirSync(path.join('content'));
+    const shortFileNames = fullFileNames.map((x: any) => x.replace('.md', ''));
+    return shortFileNames;
   };
   const importPosts = async (postNames: any) => {
     const postContents = await Promise.all(
       postNames.map((postName: string) => {
-        const content = import('../content/' + postName);
+        const content = import('../content/' + postName + '.md');
         return content;
       })
     );
@@ -60,12 +65,20 @@ Posts.getInitialProps = async () => {
     return data;
   };
 
-  const postNames = getPostFiles();
+  const postNames = await getPostFiles();
   const postContents = await importPosts(postNames);
   const data = processPosts(postContents);
+  const postTitles = data.map((d: any) => d.data.title);
+  const postExcerpts = data.map((d: any) => d.data.excerpt || null);
 
   // Pass data to our component props
-  return { data: data, fileNames: postNames };
-};
+  return {
+    props: {
+      postTitles: postTitles,
+      postExcerpts: postExcerpts,
+      fileNames: postNames
+    }
+  };
+}
 
 export default Posts;
