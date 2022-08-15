@@ -26,6 +26,10 @@ var map = {
 	"./first_post.md": [
 		"./content/first_post.md",
 		"content_first_post_md"
+	],
+	"./handling-databases-r6.md": [
+		"./content/handling-databases-r6.md",
+		"content_handling-databases-r6_md"
 	]
 };
 function webpackAsyncContext(req) {

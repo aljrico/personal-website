@@ -2,6 +2,8 @@ import React from 'react';
 import matter from 'gray-matter';
 import parsePosts from './parsePosts';
 import ReactMarkdown from 'react-markdown';
+import generalStyles from '../../styles/Home.module.css';
+import postStyles from '../../styles/post.module.css';
 
 function PostTemplate(props: any) {
   // This holds the data between `---` from the .md file
@@ -9,8 +11,15 @@ function PostTemplate(props: any) {
   const postContent = props.content;
   return (
     <>
-      <h1>{postData.title}</h1>
-      <ReactMarkdown>{postContent}</ReactMarkdown>
+      <div className={generalStyles.container}>
+        <main className={generalStyles.main}>
+          <div className={postStyles.post}>
+            {' '}
+            <h1>{postData.title}</h1>
+            <ReactMarkdown>{postContent}</ReactMarkdown>
+          </div>
+        </main>
+      </div>
     </>
   );
 }
